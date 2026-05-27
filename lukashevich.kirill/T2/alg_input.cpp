@@ -291,3 +291,126 @@ bool lukashevich::operator==(const UllBin &left, const UllBin &right)
 {
   return left.value == right.value;
 }
+
+std::istream &lukashevich::operator>>(std::istream &in, Delimiter &&data)
+{
+  char symbol = 0;
+  in >> symbol;
+
+  if (symbol != data.expected) {
+    in.setstate(std::ios_base::failbit);
+  }
+
+  return in;
+}
+
+std::istream &lukashevich::operator>>(std::istream &in, KeyValueInput &&data)
+{
+  if (data.key == "key1") {
+    if (data.usedKeys[0]) {
+      in.setstate(std::ios_base::failbit);
+      return in;
+    }
+
+    in >> data.data.key1;
+    data.usedKeys[0] = static_cast< bool >(in);
+  } else if (data.key == "key2") {
+    if (data.usedKeys[1]) {
+      in.setstate(std::ios_base::failbit);
+      return in;
+    }
+
+    in >> data.data.key2;
+    data.usedKeys[1] = static_cast< bool >(in);
+  } else if (data.key == "key3") {
+    if (data.usedKeys[2]) {
+      in.setstate(std::ios_base::failbit);
+      return in;
+    }
+
+    in >> std::quoted(data.data.key3);
+    data.usedKeys[2] = static_cast< bool >(in);
+  } else {
+    in.setstate(std::ios_base::failbit);
+  }
+
+  return in;
+}
+
+std::istream &lukashevich::operator>>(std::istream &in, DataStruct &data)
+{
+  in >> Delimiter{'('} >> Delimiter{':'};
+
+  if (!in) {
+    return in;
+  }
+
+  DataStruct input = {};
+  std::vector< bool > usedKeys(3, false);
+
+  while (in && (in.peek() != ')')) {
+    std::string key;
+    in >> key;
+
+    if (!in) {
+      return in;
+    }
+
+    in >> KeyValueInput{key, usedKeys, input};
+
+    if (!in) {
+      return in;
+    }
+
+    if (in.peek() == ':') {
+      in >> Delimiter{':'};
+    }
+  }
+
+  in >> Delimiter{')'};
+
+  if (!in) {
+    return in;
+  }
+
+  if (usedKeys[0] && usedKeys[1] && usedKeys[2]) {
+    data = input;
+  } else {
+    in.setstate(std::ios_base::failbit);
+  }
+
+  return in;
+}
+
+std::ostream &lukashevich::operator<<(std::ostream &out, const DataStruct &data)
+{
+  IOGuard guard(out);
+
+  out << "(:key1 " << data.key1
+      << ":key2 " << data.key2
+      << ":key3 " << std::quoted(data.key3)
+      << ":)";
+
+  return out;
+}
+
+bool lukashevich::operator<(const DataStruct &left, const DataStruct &right)
+{
+  if (left.key1 < right.key1) {
+    return true;
+  }
+
+  if (right.key1 < left.key1) {
+    return false;
+  }
+
+  if (left.key2 < right.key2) {
+    return true;
+  }
+
+  if (right.key2 < left.key2) {
+    return false;
+  }
+
+  return left.key3.size() < right.key3.size();
+}

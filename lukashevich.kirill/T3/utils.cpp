@@ -2,6 +2,7 @@
 
 #include <cerrno>
 #include <cstdlib>
+#include <limits>
 
 lukashevich::IOGuard::IOGuard(std::basic_ios< char > & stream):
   stream_(stream),
@@ -75,5 +76,16 @@ bool lukashevich::parseSize(const std::string & line, std::size_t & pos, std::si
   return parseSizeToken(token, value);
 }
 
-void lukashevich::readPolygons(std::istream &, std::vector< Polygon > &)
-{}
+void lukashevich::readPolygons(std::istream & input, std::vector< Polygon > & polygons)
+{
+  std::string line;
+  if (!std::getline(input, line)) {
+    return;
+  }
+
+  Polygon polygon;
+  if (parsePolygon(line, polygon)) {
+    polygons.push_back(polygon);
+  }
+  readPolygons(input, polygons);
+}

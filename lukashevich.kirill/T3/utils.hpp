@@ -24,6 +24,11 @@ namespace lukashevich {
     std::ios_base::fmtflags flags_;
   };
 
+  bool isSpace(char symbol);
+  std::size_t skipSpaces(const std::string & line, std::size_t pos);
+  bool hasOnlySpaces(const std::string & line, std::size_t pos);
+  std::string readToken(const std::string & line, std::size_t & pos);
+
   void readPolygons(std::istream & input, std::vector< Polygon > & polygons);
 }
 

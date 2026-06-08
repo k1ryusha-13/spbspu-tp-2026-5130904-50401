@@ -3,6 +3,11 @@
 #include <cerrno>
 #include <cstdlib>
 #include <numeric>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
 
 #include "utils.hpp"
 

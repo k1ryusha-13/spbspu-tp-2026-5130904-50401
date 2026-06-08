@@ -228,8 +228,6 @@ namespace lukashevich {
       } else {
         printInvalidCommand(output);
       }
-
-      printInvalidCommand(output);
     }
   }
 }

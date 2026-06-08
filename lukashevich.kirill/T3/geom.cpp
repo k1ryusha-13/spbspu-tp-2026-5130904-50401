@@ -192,6 +192,11 @@ bool lukashevich::parsePolygon(const std::string & line, Polygon & polygon)
   return true;
 }
 
+bool lukashevich::areTargetEcho(const Polygon & lhs, const Polygon & rhs, const Polygon & target)
+{
+  return (lhs == target) && (rhs == target);
+}
+
 bool lukashevich::parsePolygon(const std::string & line, std::size_t & pos, Polygon & polygon)
 {
   std::size_t count = 0;

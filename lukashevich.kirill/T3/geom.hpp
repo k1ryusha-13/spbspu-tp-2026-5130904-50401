@@ -31,6 +31,7 @@ namespace lukashevich {
   bool isVertexCountLess(const Polygon & lhs, const Polygon & rhs);
   bool hasAreaLessThan(const Polygon & polygon, double area);
   bool isAreaLess(const Polygon & lhs, const Polygon & rhs);
+  bool areTargetEcho(const Polygon & lhs, const Polygon & rhs, const Polygon & target);
 
   bool parsePolygon(const std::string & line, Polygon & polygon);
   bool parsePolygon(const std::string & line, std::size_t & pos, Polygon & polygon);

@@ -20,10 +20,7 @@ namespace lukashevich {
     double getAreaSum(const std::vector< Polygon > & polygons, Predicate predicate)
     {
       std::vector< Polygon > selected;
-      std::copy_if(polygons.begin(),
-          polygons.end(),
-          std::back_inserter(selected),
-          predicate);
+      std::copy_if(polygons.begin(), polygons.end(), std::back_inserter(selected), predicate);
 
       std::vector< double > areas(selected.size());
       std::transform(selected.begin(), selected.end(), areas.begin(), getArea);
@@ -40,6 +37,11 @@ namespace lukashevich {
     bool isCorrectVertexCount(std::size_t count)
     {
       return count >= MIN_VERTEX_COUNT;
+    }
+
+    void printInvalidCommand(std::ostream & output)
+    {
+      output << INVALID_COMMAND << '\n';
     }
 
     void printArea(std::ostream & output, double area)
@@ -87,9 +89,115 @@ namespace lukashevich {
       }
     }
 
-    void printInvalidCommand(std::ostream & output)
+    void doMax(const std::string & line, std::size_t pos, std::ostream & output, const std::vector< Polygon > & polygons)
     {
-      output << INVALID_COMMAND << '\n';
+      std::string parameter;
+      if (!readSingleParameter(line, pos, parameter)) {
+        printInvalidCommand(output);
+        return;
+      }
+      if (polygons.empty()) {
+        printInvalidCommand(output);
+        return;
+      }
+
+      if (parameter == "AREA") {
+        const std::vector< Polygon >::const_iterator result = std::max_element(polygons.begin(), polygons.end(), isAreaLess);
+        printArea(output, getArea(*result));
+      } else if (parameter == "VERTEXES") {
+        const std::vector< Polygon >::const_iterator result = std::max_element(polygons.begin(), polygons.end(), isVertexCountLess);
+        output << getVertexCount(*result) << '\n';
+      } else {
+        printInvalidCommand(output);
+      }
+    }
+
+    void doMin(const std::string & line, std::size_t pos, std::ostream & output, const std::vector< Polygon > & polygons)
+    {
+      std::string parameter;
+      if (!readSingleParameter(line, pos, parameter)) {
+        printInvalidCommand(output);
+        return;
+      }
+      if (polygons.empty()) {
+        printInvalidCommand(output);
+        return;
+      }
+
+      if (parameter == "AREA") {
+        const std::vector< Polygon >::const_iterator result = std::min_element(polygons.begin(), polygons.end(), isAreaLess);
+        printArea(output, getArea(*result));
+      } else if (parameter == "VERTEXES") {
+        const std::vector< Polygon >::const_iterator result = std::min_element(polygons.begin(), polygons.end(), isVertexCountLess);
+        output << getVertexCount(*result) << '\n';
+      } else {
+        printInvalidCommand(output);
+      }
+    }
+
+    void doCount(const std::string & line, std::size_t pos, std::ostream & output, const std::vector< Polygon > & polygons)
+    {
+      std::string parameter;
+      if (!readSingleParameter(line, pos, parameter)) {
+        printInvalidCommand(output);
+        return;
+      }
+
+      if (parameter == "EVEN") {
+        output << std::count_if(polygons.begin(), polygons.end(), hasEvenVertexCount) << '\n';
+      } else if (parameter == "ODD") {
+        output << std::count_if(polygons.begin(), polygons.end(), hasOddVertexCount) << '\n';
+      } else {
+        std::size_t vertexCount = 0;
+        if (!parseSizeToken(parameter, vertexCount)) {
+          printInvalidCommand(output);
+          return;
+        }
+        if (!isCorrectVertexCount(vertexCount)) {
+          printInvalidCommand(output);
+          return;
+        }
+        output << std::count_if(polygons.begin(),
+            polygons.end(),
+            std::bind(hasVertexCount, std::placeholders::_1, vertexCount)) << '\n';
+      }
+    }
+
+    void doLessArea(const std::string & line, std::size_t pos, std::ostream & output, const std::vector< Polygon > & polygons)
+    {
+      Polygon polygon;
+      if (!parsePolygon(line, pos, polygon)) {
+        printInvalidCommand(output);
+        return;
+      }
+      if (!hasOnlySpaces(line, pos)) {
+        printInvalidCommand(output);
+        return;
+      }
+
+      const double area = getArea(polygon);
+      output << std::count_if(polygons.begin(),
+          polygons.end(),
+          std::bind(hasAreaLessThan, std::placeholders::_1, area)) << '\n';
+    }
+
+    void doRmEcho(const std::string & line, std::size_t pos, std::ostream & output, std::vector< Polygon > & polygons)
+    {
+      Polygon target;
+      if (!parsePolygon(line, pos, target)) {
+        printInvalidCommand(output);
+        return;
+      }
+      if (!hasOnlySpaces(line, pos)) {
+        printInvalidCommand(output);
+        return;
+      }
+
+      const std::vector< Polygon >::iterator newEnd = std::unique(polygons.begin(), polygons.end(), std::bind(areTargetEcho, std::placeholders::_1, std::placeholders::_2, std::cref(target)));
+      const std::size_t removedCount = static_cast< std::size_t >(
+          std::distance(newEnd, polygons.end()));
+      polygons.erase(newEnd, polygons.end());
+      output << removedCount << '\n';
     }
 
     void executeCommand(const std::string & line, std::ostream & output, std::vector< Polygon > & polygons)
@@ -103,17 +211,21 @@ namespace lukashevich {
 
       if (command == "AREA") {
         doArea(line, pos, output, polygons);
+      } else if (command == "MAX") {
+        doMax(line, pos, output, polygons);
+      } else if (command == "MIN") {
+        doMin(line, pos, output, polygons);
+      } else if (command == "COUNT") {
+        doCount(line, pos, output, polygons);
+      } else if (command == "LESSAREA") {
+        doLessArea(line, pos, output, polygons);
+      } else if (command == "RMECHO") {
+        doRmEcho(line, pos, output, polygons);
       } else {
         printInvalidCommand(output);
       }
 
       printInvalidCommand(output);
-    }
-
-     void printArea(std::ostream & output, double area)
-    {
-      IOGuard guard(output);
-      output << std::fixed << std::setprecision(AREA_PRECISION) << area << '\n';
     }
   }
 }

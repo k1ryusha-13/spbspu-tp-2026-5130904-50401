@@ -193,7 +193,11 @@ namespace lukashevich {
         return;
       }
 
-      const std::vector< Polygon >::iterator newEnd = std::unique(polygons.begin(), polygons.end(), std::bind(areTargetEcho, std::placeholders::_1, std::placeholders::_2, std::cref(target)));
+      const std::vector< Polygon >::iterator newEnd = std::unique(polygons.begin(),
+        polygons.end(),
+        std::bind(areTargetEcho, std::placeholders::_1,
+        std::placeholders::_2,
+        std::cref(target)));
       const std::size_t removedCount = static_cast< std::size_t >(
           std::distance(newEnd, polygons.end()));
       polygons.erase(newEnd, polygons.end());

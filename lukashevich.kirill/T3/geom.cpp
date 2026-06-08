@@ -113,6 +113,26 @@ std::size_t lukashevich::getVertexCount(const Polygon & polygon)
   return polygon.points.size();
 }
 
+bool lukashevich::hasEvenVertexCount(const Polygon & polygon)
+{
+  return (getVertexCount(polygon) % 2) == 0;
+}
+
+bool lukashevich::hasOddVertexCount(const Polygon & polygon)
+{
+  return !hasEvenVertexCount(polygon);
+}
+
+bool lukashevich::hasVertexCount(const Polygon & polygon, std::size_t count)
+{
+  return getVertexCount(polygon) == count;
+}
+
+bool lukashevich::isVertexCountLess(const Polygon & lhs, const Polygon & rhs)
+{
+  return getVertexCount(lhs) < getVertexCount(rhs);
+}
+
 bool lukashevich::parsePolygon(const std::string & line, Polygon & polygon)
 {
   std::size_t pos = 0;

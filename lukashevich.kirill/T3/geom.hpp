@@ -25,6 +25,11 @@ namespace lukashevich {
   double getArea(const Polygon & polygon);
   std::size_t getVertexCount(const Polygon & polygon);
 
+  bool hasEvenVertexCount(const Polygon & polygon);
+  bool hasOddVertexCount(const Polygon & polygon);
+  bool hasVertexCount(const Polygon & polygon, std::size_t count);
+  bool isVertexCountLess(const Polygon & lhs, const Polygon & rhs);
+
   bool parsePolygon(const std::string & line, Polygon & polygon);
   bool parsePolygon(const std::string & line, std::size_t & pos, Polygon & polygon);
 }

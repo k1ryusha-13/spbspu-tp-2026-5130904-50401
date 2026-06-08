@@ -7,6 +7,8 @@
 
 namespace lukashevich {
   namespace detail {
+    const std::size_t MIN_POLYGON_VERTEX_COUNT = 3;
+    
     bool parseChar(const std::string & line, std::size_t & pos, char expected)
     {
       pos = skipSpaces(line, pos);
@@ -63,6 +65,21 @@ namespace lukashevich {
       point = Point{ x, y };
       return true;
     }
+
+    bool parsePoints(const std::string & line, std::size_t & pos, std::size_t count, std::vector< lukashevich::Point > & points)
+    {
+      if (count == 0) {
+        return true;
+      }
+
+      lukashevich::Point point = { 0, 0 };
+      if (!parsePoint(line, pos, point)) {
+        return false;
+      }
+
+      points.push_back(point);
+      return parsePoints(line, pos, count - 1, points);
+    }
   }
 }
 
@@ -96,12 +113,39 @@ std::size_t lukashevich::getVertexCount(const Polygon & polygon)
   return polygon.points.size();
 }
 
-bool lukashevich::parsePolygon(const std::string &, Polygon &)
+bool lukashevich::parsePolygon(const std::string & line, Polygon & polygon)
 {
-  return false;
+  std::size_t pos = 0;
+  Polygon parsed;
+  if (!parsePolygon(line, pos, parsed)) {
+    return false;
+  }
+  if (!hasOnlySpaces(line, pos)) {
+    return false;
+  }
+
+  polygon = parsed;
+  return true;
 }
 
-bool lukashevich::parsePolygon(const std::string &, std::size_t &, Polygon &)
+bool lukashevich::parsePolygon(const std::string & line, std::size_t & pos, Polygon & polygon)
 {
-  return false;
+  std::size_t count = 0;
+
+  if (!parseSize(line, pos, count)) {
+    return false;
+  }
+  if (count < detail::MIN_POLYGON_VERTEX_COUNT) {
+    return false;
+  }
+
+  std::vector< Point > points;
+  points.reserve(count);
+
+  if (!detail::parsePoints(line, pos, count, points)) {
+    return false;
+  }
+
+  polygon.points = points;
+  return true;
 }

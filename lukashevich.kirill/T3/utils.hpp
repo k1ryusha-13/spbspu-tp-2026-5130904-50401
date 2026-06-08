@@ -29,6 +29,9 @@ namespace lukashevich {
   bool hasOnlySpaces(const std::string & line, std::size_t pos);
   std::string readToken(const std::string & line, std::size_t & pos);
 
+  bool parseSizeToken(const std::string & token, std::size_t & value);
+  bool parseSize(const std::string & line, std::size_t & pos, std::size_t & value);
+
   void readPolygons(std::istream & input, std::vector< Polygon > & polygons);
 }
 

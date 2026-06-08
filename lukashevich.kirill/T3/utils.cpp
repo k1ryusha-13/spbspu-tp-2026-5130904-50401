@@ -1,5 +1,8 @@
 #include "utils.hpp"
 
+#include <cerrno>
+#include <cstdlib>
+
 lukashevich::IOGuard::IOGuard(std::basic_ios< char > & stream):
   stream_(stream),
   fill_(stream.fill()),
@@ -46,6 +49,30 @@ std::string lukashevich::readToken(const std::string & line, std::size_t & pos)
 
   pos = end;
   return line.substr(begin, end - begin);
+}
+
+bool lukashevich::parseSizeToken(const std::string & token, std::size_t & value)
+{
+  if (token.empty()) {
+    return false;
+  }
+
+  char * end = 0;
+  errno = 0;
+  const unsigned long parsed = std::strtoul(token.c_str(), &end, 10);
+
+  if ((errno != 0) || (*end != '\0')) {
+    return false;
+  }
+
+  value = static_cast< std::size_t >(parsed);
+  return true;
+}
+
+bool lukashevich::parseSize(const std::string & line, std::size_t & pos, std::size_t & value)
+{
+  const std::string token = readToken(line, pos);
+  return parseSizeToken(token, value);
 }
 
 void lukashevich::readPolygons(std::istream &, std::vector< Polygon > &)

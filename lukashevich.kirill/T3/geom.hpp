@@ -29,6 +29,8 @@ namespace lukashevich {
   bool hasOddVertexCount(const Polygon & polygon);
   bool hasVertexCount(const Polygon & polygon, std::size_t count);
   bool isVertexCountLess(const Polygon & lhs, const Polygon & rhs);
+  bool hasAreaLessThan(const Polygon & polygon, double area);
+  bool isAreaLess(const Polygon & lhs, const Polygon & rhs);
 
   bool parsePolygon(const std::string & line, Polygon & polygon);
   bool parsePolygon(const std::string & line, std::size_t & pos, Polygon & polygon);
